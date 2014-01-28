@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="UTF-8"?>
+ 
+<plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
+           id="ch.ti8m.documenthandler"
+      version="0.1.0">
+
+  <!--
+  <engines>
+    <engine name="cordova" version=">=3.3.0" />
+  </engines>
+  -->
+
+  <name>Document Handler</name>
+
+  <license>Apache 2.0</license>
+
+  <js-module src="www/DocumentHandler.js" name="DocumentHandler">
+    <clobbers target="handleDocumentWithURL" />
+  </js-module>
+
+  <platform name="android">
+
+		<config-file target="res/xml/config.xml" parent="/*">
+			<feature name="DocumentHandler" >
+				<param name="android-package" value="ch.ti8m.phonegap.plugins.DocumentHandler"/>
+			</feature>
+		</config-file>
+
+    <source-file src="src/android/DocumentHandler.java" target-dir="src/ch/ti8m/phonegap/plugins" />
+
+  </platform>
+
+	<platform name="ios">
+		
+		<config-file target="config.xml" parent="/*">
+			<feature name="DocumentHandler">
+				<param name="ios-package" value="DocumentHandler"/>
+			</feature>
+		</config-file>
+
+    <framework src="QuickLook.framework" />
+
+		<source-file src="src/ios/DocumentHandler.m" />
+
+		<header-file src="src/ios/DocumentHandler.h" />
+
+	</platform>
+
+
+</plugin>

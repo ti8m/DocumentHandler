@@ -93,7 +93,6 @@ public class DocumentHandler extends CordovaPlugin {
 			String auth = cookieManager.getCookie(url).toString();
 
 			URL url2 = new URL(url);
-			// TODO: we need to pass the cookies of the current web view
 			HttpURLConnection conn = (HttpURLConnection)url2.openConnection();
 			conn.setRequestProperty("Cookie", auth);
 
@@ -148,7 +147,6 @@ public class DocumentHandler extends CordovaPlugin {
 	 * Removes all files from our private cache directory. 
 	 */
 	private void clearCacheDirectory() {
-		// TODO: implement this
 		Context context = this.cordova.getActivity().getApplicationContext();
 
 		File dir = context.getExternalFilesDir(null);

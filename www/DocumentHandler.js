@@ -1,15 +1,13 @@
 var myFunc = function (
   successHandler, 
   failureHandler, 
-  url, 
-  base64) {
+  url) {
   cordova.exec(
       successHandler, 
       failureHandler, 
       "DocumentHandler", 
       "HandleDocumentWihtURL", 
-      [{"url" : url,
-      "base64" : base64}]);
+      [{"url" : url}]);
 };
 
 window.handleDocumentWithURL = myFunc;

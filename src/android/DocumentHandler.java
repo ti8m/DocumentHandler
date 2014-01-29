@@ -1,14 +1,12 @@
 package ch.ti8m.phonegap.plugins;
 
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
+import java.net.HttpURLConnection;
 import java.net.URL;
-import java.net.URLConnection;
 
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
@@ -20,7 +18,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
-import android.util.Base64;
+import android.webkit.CookieManager;
 import android.webkit.MimeTypeMap;
 
 public class DocumentHandler extends CordovaPlugin {
@@ -32,44 +30,30 @@ public class DocumentHandler extends CordovaPlugin {
 	@Override
 	public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
 		if (HANDLE_DOCUMENT_ACTION.equals(action)) {
+
+			// clean up previous files we downloaded
+			clearCacheDirectory();
+
 			final JSONObject arg_object = args.getJSONObject(0);
 			final String url = arg_object.getString("url");
 			System.out.println("Found: " + url);
+			final File f = this.downloadFile(url);
+
 			cordova.getActivity().runOnUiThread(new Runnable() {
 				@Override
 				public void run() {
 
 					Context context = cordova.getActivity().getApplicationContext();
 
-					// clean up previous files we downloaded
-					clearCacheDirectory();
-
 					// get file bytes. Maybe download them. 
-					String base64 = null;
-					if(arg_object.has("base64")) {
-						try {
-							base64 = arg_object.getString("base64");
-						} catch (JSONException e) {
-							// TODO Auto-generated catch block
-							e.printStackTrace();
-						}
-					}
-					byte[] bytes = getBytesForFile(url, base64);
-					if(bytes == null) {
+					if(f == null) {
 						callbackContext.error(ERROR_UNKNOWN_ERROR);
 						return;
 					}
 
 					// get mime type of file data
-					String mimeType = getMimeType(url, bytes);
+					String mimeType = getMimeType(url);
 					if(mimeType == null) {
-						callbackContext.error(ERROR_UNKNOWN_ERROR);
-						return;
-					}
-
-					// create a local file to use as the intent target
-					File f = createFileWithBytes(url, bytes);
-					if(f == null) {
 						callbackContext.error(ERROR_UNKNOWN_ERROR);
 						return;
 					}
@@ -99,50 +83,44 @@ public class DocumentHandler extends CordovaPlugin {
 
 	private final static String FILE_PREFIX = "DH_";
 
-	private File createFileWithBytes(String url, byte[] bytes) {
-
-		Context context = this.cordova.getActivity().getApplicationContext();
-
-		String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+	private File downloadFile(String url) {
 
 		try {
-			File f = File.createTempFile(FILE_PREFIX, extension, context.getExternalFilesDir(null));
-			FileOutputStream stream = new FileOutputStream(f);
-			stream.write(bytes);
-			stream.close();
+			// get an instance of a cookie manager since it has access to our auth cookie
+			CookieManager cookieManager = CookieManager.getInstance();
+
+			// get the cookie string for the site.  This looks something like ".ASPXAUTH=data"
+			String auth = cookieManager.getCookie(url).toString();
+
+			URL url2 = new URL(url);
+			// TODO: we need to pass the cookies of the current web view
+			HttpURLConnection conn = (HttpURLConnection)url2.openConnection();
+			conn.setRequestProperty("Cookie", auth);
+
+			InputStream reader = conn.getInputStream();
+
+			Context context = this.cordova.getActivity().getApplicationContext();
+			String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+			File f = File.createTempFile(FILE_PREFIX, "." + extension, context.getExternalFilesDir(null));
+			System.out.println("File: " + f.getAbsolutePath());
+			FileOutputStream outStream = new FileOutputStream(f);
+
+			byte[] buffer = new byte[1024];
+			int readBytes = reader.read(buffer);
+			while(readBytes > 0) {
+				outStream.write(buffer, 0, readBytes);
+				readBytes = reader.read(buffer);
+			}
+			reader.close();
+			outStream.close();
 			return f;
+
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
 		return null;
 	}
 
-	private byte[] getBytesForFile(String url, String data) {
-		if(data != null) {
-			System.out.println("Lenght of base64: " + data.length());
-			return Base64.decode(data, 0);
-		}
-		else {
-			try {
-				URL url2 = new URL(url);
-				URLConnection conn = url2.openConnection();
-				InputStream reader = conn.getInputStream();
-
-				ByteArrayOutputStream outStream = new ByteArrayOutputStream();
-				byte[] buffer = new byte[1024];
-				int readBytes = reader.read(buffer);
-				while(readBytes > 0) {
-					outStream.write(buffer, 0, readBytes);
-				}
-				return outStream.toByteArray();
-
-			} catch (IOException e) {
-				e.printStackTrace();
-			}
-		}
-		return null;
-	}
 
 	/**
 	 * Returns the MIME Type of the file by looking at file 
@@ -150,24 +128,14 @@ public class DocumentHandler extends CordovaPlugin {
 	 * @param url
 	 * @return
 	 */
-	private static String getMimeType(String url, byte[] data)
+	private static String getMimeType(String url)
 	{
-		InputStream inStream = new ByteArrayInputStream(data);
 		String mimeType = null;
 
-		try {
-			mimeType = URLConnection.guessContentTypeFromStream(inStream);
-		} catch (IOException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
-
-		if(mimeType == null) {
-			String extension = MimeTypeMap.getFileExtensionFromUrl(url);
-			if (extension != null) {
-				MimeTypeMap mime = MimeTypeMap.getSingleton();
-				mimeType = mime.getMimeTypeFromExtension(extension);
-			}
+		String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+		if (extension != null) {
+			MimeTypeMap mime = MimeTypeMap.getSingleton();
+			mimeType = mime.getMimeTypeFromExtension(extension);
 		}
 
 		System.out.println("Mime Type: " + mimeType);
@@ -199,9 +167,4 @@ public class DocumentHandler extends CordovaPlugin {
 			fVictim.delete();
 		}
 	}
-
-	private void beep() {
-		System.out.println("Hello World");
-	}
-
 }

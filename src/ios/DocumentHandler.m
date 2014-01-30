@@ -29,7 +29,7 @@
     });
 
     
-//    [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
+    [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
 }
 
 #pragma mark - QLPreviewController data source

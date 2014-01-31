@@ -49,36 +49,6 @@ public class DocumentHandler extends CordovaPlugin {
 			
 			new FileDownloaderAsyncTask(callbackContext, url).execute();
 			
-//			cordova.getActivity().runOnUiThread(new Runnable() {
-//				@Override
-//				public void run() {
-//
-//					Context context = cordova.getActivity()
-//							.getApplicationContext();
-//
-//					// get mime type of file data
-//					String mimeType = getMimeType(url);
-//					if (mimeType == null) {
-//						callbackContext.error(ERROR_UNKNOWN_ERROR);
-//						return;
-//					}
-//
-//					// start an intent with the file
-//					try {
-//						Intent intent = new Intent(Intent.ACTION_VIEW);
-//						intent.setDataAndType(Uri.fromFile(f), mimeType);
-//						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-//						context.startActivity(intent);
-//
-//						callbackContext.success(); // Thread-safe.
-//					} catch (ActivityNotFoundException e) {
-//						// happens when we start intent without something that
-//						// can handle it
-//						e.printStackTrace();
-//						callbackContext.error(ERROR_NO_HANDLER_FOR_DATA_TYPE);
-//					}
-//				}
-//			});
 			return true;
 		}
 		return false;

@@ -18,6 +18,7 @@ import android.content.ActivityNotFoundException;
 import android.content.Context;
 import android.content.Intent;
 import android.net.Uri;
+import android.os.AsyncTask;
 import android.webkit.CookieManager;
 import android.webkit.MimeTypeMap;
 
@@ -28,61 +29,62 @@ public class DocumentHandler extends CordovaPlugin {
 	public static final int ERROR_UNKNOWN_ERROR = 1;
 
 	@Override
-	public boolean execute(String action, JSONArray args, final CallbackContext callbackContext) throws JSONException {
+	public boolean execute(String action, JSONArray args,
+			final CallbackContext callbackContext) throws JSONException {
 		if (HANDLE_DOCUMENT_ACTION.equals(action)) {
 
 			// clean up previous files we downloaded
 			clearCacheDirectory();
-
 			// parse arguments
 			final JSONObject arg_object = args.getJSONObject(0);
 			final String url = arg_object.getString("url");
 			System.out.println("Found: " + url);
-			
+
 			// download file from url
 			final File f = this.downloadFile(url);
-			if(f == null) {
+			if (f == null) {
 				callbackContext.error(ERROR_UNKNOWN_ERROR);
 				return true;
 			}
-
-			cordova.getActivity().runOnUiThread(new Runnable() {
-				@Override
-				public void run() {
-
-					Context context = cordova.getActivity().getApplicationContext();
-
-					// get mime type of file data
-					String mimeType = getMimeType(url);
-					if(mimeType == null) {
-						callbackContext.error(ERROR_UNKNOWN_ERROR);
-						return;
-					}
-
-					// start an intent with the file
-					try {
-						Intent intent = new Intent(Intent.ACTION_VIEW);
-						intent.setDataAndType(
-								Uri.fromFile(f), 
-								mimeType);
-						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
-						context.startActivity(intent);
-
-						callbackContext.success(); // Thread-safe.
-					}
-					catch(ActivityNotFoundException e) {
-						// happens when we start intent without something that can handle it
-						e.printStackTrace();
-						callbackContext.error(ERROR_NO_HANDLER_FOR_DATA_TYPE);
-					}
-				}
-			});
+			
+			new FileDownloaderAsyncTask(callbackContext, url).execute();
+			
+//			cordova.getActivity().runOnUiThread(new Runnable() {
+//				@Override
+//				public void run() {
+//
+//					Context context = cordova.getActivity()
+//							.getApplicationContext();
+//
+//					// get mime type of file data
+//					String mimeType = getMimeType(url);
+//					if (mimeType == null) {
+//						callbackContext.error(ERROR_UNKNOWN_ERROR);
+//						return;
+//					}
+//
+//					// start an intent with the file
+//					try {
+//						Intent intent = new Intent(Intent.ACTION_VIEW);
+//						intent.setDataAndType(Uri.fromFile(f), mimeType);
+//						intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+//						context.startActivity(intent);
+//
+//						callbackContext.success(); // Thread-safe.
+//					} catch (ActivityNotFoundException e) {
+//						// happens when we start intent without something that
+//						// can handle it
+//						e.printStackTrace();
+//						callbackContext.error(ERROR_NO_HANDLER_FOR_DATA_TYPE);
+//					}
+//				}
+//			});
 			return true;
 		}
 		return false;
 	}
 
-	// used for all downloaded files, so we can find and delete them again. 
+	// used for all downloaded files, so we can find and delete them again.
 	private final static String FILE_PREFIX = "DH_";
 
 	/**
@@ -94,32 +96,35 @@ public class DocumentHandler extends CordovaPlugin {
 	private File downloadFile(String url) {
 
 		try {
-			// get an instance of a cookie manager since it has access to our auth cookie
+			// get an instance of a cookie manager since it has access to our
+			// auth cookie
 			CookieManager cookieManager = CookieManager.getInstance();
 
-			// get the cookie string for the site. 
+			// get the cookie string for the site.
 			String auth = null;
-			if(cookieManager.getCookie(url) != null) {
+			if (cookieManager.getCookie(url) != null) {
 				auth = cookieManager.getCookie(url).toString();
 			}
 
 			URL url2 = new URL(url);
-			HttpURLConnection conn = (HttpURLConnection)url2.openConnection();
-			if(auth != null) {
+			HttpURLConnection conn = (HttpURLConnection) url2.openConnection();
+			if (auth != null) {
 				conn.setRequestProperty("Cookie", auth);
 			}
 
 			InputStream reader = conn.getInputStream();
 
-			Context context = this.cordova.getActivity().getApplicationContext();
+			Context context = this.cordova.getActivity()
+					.getApplicationContext();
 			String extension = MimeTypeMap.getFileExtensionFromUrl(url);
-			File f = File.createTempFile(FILE_PREFIX, "." + extension, context.getExternalFilesDir(null));
+			File f = File.createTempFile(FILE_PREFIX, "." + extension,
+					context.getExternalFilesDir(null));
 			System.out.println("File: " + f.getAbsolutePath());
 			FileOutputStream outStream = new FileOutputStream(f);
 
 			byte[] buffer = new byte[1024];
 			int readBytes = reader.read(buffer);
-			while(readBytes > 0) {
+			while (readBytes > 0) {
 				outStream.write(buffer, 0, readBytes);
 				readBytes = reader.read(buffer);
 			}
@@ -133,15 +138,14 @@ public class DocumentHandler extends CordovaPlugin {
 		return null;
 	}
 
-
 	/**
-	 * Returns the MIME Type of the file by looking at file 
-	 * name extension in the URL. 
+	 * Returns the MIME Type of the file by looking at file name extension in
+	 * the URL.
+	 * 
 	 * @param url
 	 * @return
 	 */
-	private static String getMimeType(String url)
-	{
+	private static String getMimeType(String url) {
 		String mimeType = null;
 
 		String extension = MimeTypeMap.getFileExtensionFromUrl(url);
@@ -155,16 +159,65 @@ public class DocumentHandler extends CordovaPlugin {
 		return mimeType;
 	}
 
+	private class FileDownloaderAsyncTask extends AsyncTask<Void, Void, File> {
+
+		private CallbackContext callbackContext;
+		private String url;
+
+		public FileDownloaderAsyncTask(CallbackContext callbackContext,
+				String url) {
+			super();
+			this.callbackContext = callbackContext;
+			this.url = url;
+		}
+
+		@Override
+		protected File doInBackground(Void... arg0) {
+
+			File f = downloadFile(url);
+
+			return f;
+		}
+
+		@Override
+		protected void onPostExecute(File result) {
+
+			Context context = cordova.getActivity().getApplicationContext();
+
+			// get mime type of file data
+			String mimeType = getMimeType(url);
+			if (mimeType == null) {
+				callbackContext.error(ERROR_UNKNOWN_ERROR);
+				return;
+			}
+
+			// start an intent with the file
+			try {
+				Intent intent = new Intent(Intent.ACTION_VIEW);
+				intent.setDataAndType(Uri.fromFile(result), mimeType);
+				intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				context.startActivity(intent);
+
+				callbackContext.success(); // Thread-safe.
+			} catch (ActivityNotFoundException e) {
+				// happens when we start intent without something that can
+				// handle it
+				e.printStackTrace();
+				callbackContext.error(ERROR_NO_HANDLER_FOR_DATA_TYPE);
+			}
+
+		}
+	}
 
 	/**
-	 * Removes all files from our private cache directory that 
-	 * we created ourselves. 
+	 * Removes all files from our private cache directory that we created
+	 * ourselves.
 	 */
 	private void clearCacheDirectory() {
 		Context context = this.cordova.getActivity().getApplicationContext();
 
 		File dir = context.getExternalFilesDir(null);
-		if(dir == null) {
+		if (dir == null) {
 			return;
 		}
 		String[] victims = dir.list(new FilenameFilter() {
@@ -174,9 +227,10 @@ public class DocumentHandler extends CordovaPlugin {
 				return filename.startsWith(FILE_PREFIX);
 			}
 		});
-		for(int i = 0; i < victims.length; i++) {
+		for (int i = 0; i < victims.length; i++) {
 			File fVictim = new File(dir, victims[i]);
 			fVictim.delete();
 		}
 	}
+
 }

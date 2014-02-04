@@ -4,11 +4,9 @@
            id="ch.ti8m.documenthandler"
       version="0.1.0">
 
-  <!--
   <engines>
-    <engine name="cordova" version=">=3.3.0" />
+    <engine name="cordova" version=">=3.0.0" />
   </engines>
-  -->
 
   <name>Document Handler</name>
 

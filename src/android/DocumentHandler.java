@@ -2,7 +2,6 @@ package ch.ti8m.phonegap.plugins;
 
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
@@ -33,20 +32,12 @@ public class DocumentHandler extends CordovaPlugin {
 			final CallbackContext callbackContext) throws JSONException {
 		if (HANDLE_DOCUMENT_ACTION.equals(action)) {
 
-			// clean up previous files we downloaded
-			clearCacheDirectory();
 			// parse arguments
 			final JSONObject arg_object = args.getJSONObject(0);
 			final String url = arg_object.getString("url");
 			System.out.println("Found: " + url);
 
-			// download file from url
-			final File f = this.downloadFile(url);
-			if (f == null) {
-				callbackContext.error(ERROR_UNKNOWN_ERROR);
-				return true;
-			}
-			
+			// start async download task
 			new FileDownloaderAsyncTask(callbackContext, url).execute();
 			
 			return true;
@@ -84,12 +75,11 @@ public class DocumentHandler extends CordovaPlugin {
 
 			InputStream reader = conn.getInputStream();
 
-			Context context = this.cordova.getActivity()
-					.getApplicationContext();
 			String extension = MimeTypeMap.getFileExtensionFromUrl(url);
 			File f = File.createTempFile(FILE_PREFIX, "." + extension,
-					context.getExternalFilesDir(null));
-			System.out.println("File: " + f.getAbsolutePath());
+					null);
+			// make sure the receiving app can read this file
+			f.setReadable(true, false);
 			FileOutputStream outStream = new FileOutputStream(f);
 
 			byte[] buffer = new byte[1024];
@@ -131,8 +121,8 @@ public class DocumentHandler extends CordovaPlugin {
 
 	private class FileDownloaderAsyncTask extends AsyncTask<Void, Void, File> {
 
-		private CallbackContext callbackContext;
-		private String url;
+		private final CallbackContext callbackContext;
+		private final String url;
 
 		public FileDownloaderAsyncTask(CallbackContext callbackContext,
 				String url) {
@@ -176,30 +166,6 @@ public class DocumentHandler extends CordovaPlugin {
 				callbackContext.error(ERROR_NO_HANDLER_FOR_DATA_TYPE);
 			}
 
-		}
-	}
-
-	/**
-	 * Removes all files from our private cache directory that we created
-	 * ourselves.
-	 */
-	private void clearCacheDirectory() {
-		Context context = this.cordova.getActivity().getApplicationContext();
-
-		File dir = context.getExternalFilesDir(null);
-		if (dir == null) {
-			return;
-		}
-		String[] victims = dir.list(new FilenameFilter() {
-
-			@Override
-			public boolean accept(File dir, String filename) {
-				return filename.startsWith(FILE_PREFIX);
-			}
-		});
-		for (int i = 0; i < victims.length; i++) {
-			File fVictim = new File(dir, victims[i]);
-			fVictim.delete();
 		}
 	}
 

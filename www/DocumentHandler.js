@@ -6,7 +6,7 @@ var myFunc = function (
       successHandler, 
       failureHandler, 
       "DocumentHandler", 
-      "HandleDocumentWihtURL", 
+      "HandleDocumentWithURL", 
       [{"url" : url}]);
 };
 

@@ -3,33 +3,38 @@
 
 @implementation DocumentHandler
 
-- (void)HandleDocumentWihtURL:(CDVInvokedUrlCommand*)command;
+- (void)HandleDocumentWithURL:(CDVInvokedUrlCommand*)command;
 {
     CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
 
-    NSDictionary* dict = [command.arguments objectAtIndex:0];
+    __weak DocumentHandler* weakSelf = self;
     
-    NSString* urlStr = dict[@"url"];
-    NSLog(@"Got url: %@", urlStr);
-    NSURL* url = [NSURL URLWithString:urlStr];
-    NSData* dat = [NSData dataWithContentsOfURL:url];
-    NSString* fileName = [url lastPathComponent];
-    NSString* path = [NSTemporaryDirectory() stringByAppendingPathComponent: fileName];
-    NSURL* tmpFileUrl = [[NSURL alloc] initFileURLWithPath:path];
-    [dat writeToURL:tmpFileUrl atomically:YES];
-    self.fileUrl = tmpFileUrl;
-    
-    dispatch_async(dispatch_get_main_queue(), ^{
-        QLPreviewController* cntr = [[QLPreviewController alloc] init];
-        cntr.delegate = self;
-        cntr.dataSource = self;
+    dispatch_queue_t asyncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
+    dispatch_async(asyncQueue, ^{
         
-        UIViewController* root = [[[UIApplication sharedApplication] keyWindow] rootViewController];
-        [root presentViewController:cntr animated:YES completion:nil];
+        NSDictionary* dict = [command.arguments objectAtIndex:0];
+        
+        NSString* urlStr = dict[@"url"];
+        NSURL* url = [NSURL URLWithString:urlStr];
+        NSData* dat = [NSData dataWithContentsOfURL:url];
+        NSString* fileName = [url lastPathComponent];
+        NSString* path = [NSTemporaryDirectory() stringByAppendingPathComponent: fileName];
+        NSURL* tmpFileUrl = [[NSURL alloc] initFileURLWithPath:path];
+        [dat writeToURL:tmpFileUrl atomically:YES];
+        weakSelf.fileUrl = tmpFileUrl;
+        
+        dispatch_async(dispatch_get_main_queue(), ^{
+            QLPreviewController* cntr = [[QLPreviewController alloc] init];
+            cntr.delegate = weakSelf;
+            cntr.dataSource = weakSelf;
+            
+            UIViewController* root = [[[UIApplication sharedApplication] keyWindow] rootViewController];
+            [root presentViewController:cntr animated:YES completion:nil];
+        });
+        
+        
+        [weakSelf.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
     });
-
-    
-    [self.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
 }
 
 #pragma mark - QLPreviewController data source

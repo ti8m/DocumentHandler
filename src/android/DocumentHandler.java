@@ -23,7 +23,7 @@ import android.webkit.MimeTypeMap;
 
 public class DocumentHandler extends CordovaPlugin {
 
-	public static final String HANDLE_DOCUMENT_ACTION = "HandleDocumentWihtURL";
+	public static final String HANDLE_DOCUMENT_ACTION = "HandleDocumentWithURL";
 	public static final int ERROR_NO_HANDLER_FOR_DATA_TYPE = 53;
 	public static final int ERROR_UNKNOWN_ERROR = 1;
 

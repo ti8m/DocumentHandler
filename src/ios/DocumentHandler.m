@@ -5,8 +5,6 @@
 
 - (void)HandleDocumentWithURL:(CDVInvokedUrlCommand*)command;
 {
-    CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
-
     __weak DocumentHandler* weakSelf = self;
     
     dispatch_queue_t asyncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -17,6 +15,12 @@
         NSString* urlStr = dict[@"url"];
         NSURL* url = [NSURL URLWithString:urlStr];
         NSData* dat = [NSData dataWithContentsOfURL:url];
+        if (dat == nil) {
+          CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_ERROR messageAsInt:2];
+          [weakSelf.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
+          return;
+        }
+
         NSString* fileName = [url lastPathComponent];
         NSString* path = [NSTemporaryDirectory() stringByAppendingPathComponent: fileName];
         NSURL* tmpFileUrl = [[NSURL alloc] initFileURLWithPath:path];
@@ -33,6 +37,7 @@
         });
         
         
+        CDVPluginResult *commandResult = [CDVPluginResult resultWithStatus:CDVCommandStatus_OK messageAsString:@""];
         [weakSelf.commandDelegate sendPluginResult:commandResult callbackId:command.callbackId];
     });
 }

@@ -1,9 +1,6 @@
 package ch.ti8m.phonegap.plugins;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -25,11 +22,12 @@ public class DocumentHandler extends CordovaPlugin {
 
 	public static final String HANDLE_DOCUMENT_ACTION = "HandleDocumentWithURL";
 	public static final int ERROR_NO_HANDLER_FOR_DATA_TYPE = 53;
+	public static final int ERROR_FILE_NOT_FOUND = 2;
 	public static final int ERROR_UNKNOWN_ERROR = 1;
 
 	@Override
 	public boolean execute(String action, JSONArray args,
-			final CallbackContext callbackContext) throws JSONException {
+												 final CallbackContext callbackContext) throws JSONException {
 		if (HANDLE_DOCUMENT_ACTION.equals(action)) {
 
 			// parse arguments
@@ -39,7 +37,7 @@ public class DocumentHandler extends CordovaPlugin {
 
 			// start async download task
 			new FileDownloaderAsyncTask(callbackContext, url).execute();
-			
+
 			return true;
 		}
 		return false;
@@ -50,11 +48,11 @@ public class DocumentHandler extends CordovaPlugin {
 
 	/**
 	 * downloads a file from the given url to external storage.
-	 * 
+	 *
 	 * @param url
 	 * @return
 	 */
-	private File downloadFile(String url) {
+	private File downloadFile(String url, CallbackContext callbackContext) {
 
 		try {
 			// get an instance of a cookie manager since it has access to our
@@ -92,16 +90,21 @@ public class DocumentHandler extends CordovaPlugin {
 			outStream.close();
 			return f;
 
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+			callbackContext.error(ERROR_FILE_NOT_FOUND);
+			return null;
 		} catch (IOException e) {
 			e.printStackTrace();
+			callbackContext.error(ERROR_UNKNOWN_ERROR);
+			return null;
 		}
-		return null;
 	}
 
 	/**
 	 * Returns the MIME Type of the file by looking at file name extension in
 	 * the URL.
-	 * 
+	 *
 	 * @param url
 	 * @return
 	 */
@@ -125,7 +128,7 @@ public class DocumentHandler extends CordovaPlugin {
 		private final String url;
 
 		public FileDownloaderAsyncTask(CallbackContext callbackContext,
-				String url) {
+																	 String url) {
 			super();
 			this.callbackContext = callbackContext;
 			this.url = url;
@@ -133,14 +136,15 @@ public class DocumentHandler extends CordovaPlugin {
 
 		@Override
 		protected File doInBackground(Void... arg0) {
-
-			File f = downloadFile(url);
-
-			return f;
+			return downloadFile(url, callbackContext);
 		}
 
 		@Override
 		protected void onPostExecute(File result) {
+			if (result == null) {
+				// case has already been handled
+				return;
+			}
 
 			Context context = cordova.getActivity().getApplicationContext();
 

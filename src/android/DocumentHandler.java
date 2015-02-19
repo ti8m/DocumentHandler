@@ -1,6 +1,10 @@
 package ch.ti8m.phonegap.plugins;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
@@ -136,7 +140,13 @@ public class DocumentHandler extends CordovaPlugin {
 
 		@Override
 		protected File doInBackground(Void... arg0) {
-			return downloadFile(url, callbackContext);
+			if(!url.startsWith("file://")){
+                return downloadFile(url, callbackContext);
+            }
+            else{
+                File file = new File(url.replaceFirst("file://", ""));
+                return file;
+            }
 		}
 
 		@Override

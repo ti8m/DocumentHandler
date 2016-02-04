@@ -1,4 +1,4 @@
-# DocumentHandler
+# Polar Cape Cordova Plugin Document Handler
 
 A PhoneGap plugin to handle documents (e.g. PDFs) loaded from a URL. 
 

@@ -1,51 +1,56 @@
 <?xml version="1.0" encoding="UTF-8"?>
  
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
-           id="ch.ti8m.documenthandler"
-      version="0.2.2">
+        id="ch.ti8m.documenthandler"
+        version="0.2.2">
 
-  <engines>
-    <engine name="cordova" version=">=3.0.0" />
-  </engines>
+    <engines>
+        <engine name="cordova" version=">=3.0.0" />
+    </engines>
 
-  <name>Document Handler</name>
-  <description>A phonegap plugin to handle documents (f.e. PDFs) given by URL. </description>
-  <keywords>cordova,Documents,PDF</keywords>
-  <repo>https://github.com/ti8mag/DocumentHandler.git</repo>
+    <name>Document Handler</name>
+    <description>A phonegap plugin to handle documents (f.e. PDFs) given by URL. </description>
+    <keywords>cordova,Documents,PDF</keywords>
+    <repo>https://github.com/ti8mag/DocumentHandler.git</repo>
 
-  <license>Apache 2.0</license>
+    <license>Apache 2.0</license>
 
-  <js-module src="www/DocumentHandler.js" name="DocumentHandler">
-    <clobbers target="handleDocumentWithURL" />
-  </js-module>
+    <js-module src="www/DocumentHandler.js" name="DocumentHandler">
+        <clobbers target="DocumentHandler" />
+    </js-module>
+  
+    <dependency id="cordova-plugin-file" version="^4.0.0" />
 
-  <platform name="android">
+    <platform name="android">
 
-		<config-file target="res/xml/config.xml" parent="/*">
-			<feature name="DocumentHandler" >
-				<param name="android-package" value="ch.ti8m.phonegap.plugins.DocumentHandler"/>
-			</feature>
-		</config-file>
+        <config-file target="res/xml/config.xml" parent="/*">
+            <feature name="DocumentHandler" >
+                <param name="android-package" value="ch.ti8m.phonegap.plugins.DocumentHandler"/>
+            </feature>
+            <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
+        </config-file>
 
-    <source-file src="src/android/DocumentHandler.java" target-dir="src/ch/ti8m/phonegap/plugins" />
+        <source-file src="src/android/DocumentHandler.java" target-dir="src/ch/ti8m/phonegap/plugins" />
 
-  </platform>
+    </platform>
 
-	<platform name="ios">
+    <platform name="ios">
 		
-		<config-file target="config.xml" parent="/*">
-			<feature name="DocumentHandler">
-				<param name="ios-package" value="DocumentHandler"/>
-			</feature>
-		</config-file>
+        <config-file target="config.xml" parent="/*">
+            <feature name="DocumentHandler">
+                <param name="ios-package" value="DocumentHandler"/>
+            </feature>
+        </config-file>
+        
+        <framework src="AssetsLibrary.framework" />
 
-    <framework src="QuickLook.framework" />
+        <framework src="QuickLook.framework" />
 
-		<source-file src="src/ios/DocumentHandler.m" />
+        <source-file src="src/ios/DocumentHandler.m" />
 
-		<header-file src="src/ios/DocumentHandler.h" />
+        <header-file src="src/ios/DocumentHandler.h" />
 
-	</platform>
+    </platform>
 
 
 </plugin>

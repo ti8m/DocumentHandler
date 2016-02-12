@@ -4,8 +4,10 @@ A PhoneGap plugin to handle documents (e.g. PDFs) loaded from a URL.
 
 ## Plugin dependencies
     
-  This plugin depends on cordova-plugin-file
-    If you want to install this plugin you must install first cordova-plugin-file
+This plugin depends on cordova-plugin-file. If you want to install this plugin you must install first cordova-plugin-file.
+
+    cordova plugin add cordova-plugin-file
+
 ## Install
 
     npm install -g polarcape-cordova-plugin-document-handler

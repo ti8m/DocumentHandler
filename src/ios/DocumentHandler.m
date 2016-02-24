@@ -22,6 +22,12 @@
         }
 
         NSString* fileName = [url lastPathComponent];
+        
+        NSString* fileExt = [fileName pathExtension];
+        if([fileExt length] == 0){
+            fileName = [NSString stringWithFormat:@"%@%@", fileName, @".pdf"];
+        }
+        
         NSString* path = [NSTemporaryDirectory() stringByAppendingPathComponent: fileName];
         NSURL* tmpFileUrl = [[NSURL alloc] initFileURLWithPath:path];
         [dat writeToURL:tmpFileUrl atomically:YES];

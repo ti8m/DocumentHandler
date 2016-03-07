@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
  
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
-        id="ch.ti8m.documenthandler"
-        version="0.2.2">
+        id="com.polarcape.plugins.documenthandler"
+        version="1.0.4">
 
     <engines>
         <engine name="cordova" version=">=3.0.0" />

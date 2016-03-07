@@ -79,6 +79,10 @@ public class DocumentHandler extends CordovaPlugin {
             InputStream reader = conn.getInputStream();
 
             String extension = MimeTypeMap.getFileExtensionFromUrl(url);
+            if (extension.equals("")) {
+                extension = "pdf";
+                System.out.println("extension (default): " + extension);
+            }
             File f = File.createTempFile(FILE_PREFIX, "." + extension,
                     null);
             // make sure the receiving app can read this file
@@ -123,6 +127,11 @@ public class DocumentHandler extends CordovaPlugin {
         }
 
         System.out.println("Mime Type: " + mimeType);
+
+        if (mimeType == null) {
+            mimeType = "application/pdf";
+            System.out.println("Mime Type (default): " + mimeType);
+        }
 
         return mimeType;
     }

@@ -2,7 +2,7 @@
  
 <plugin xmlns="http://www.phonegap.com/ns/plugins/1.0"
         id="com.polarcape.plugins.documenthandler"
-        version="1.0.4">
+        version="1.0.5">
 
     <engines>
         <engine name="cordova" version=">=3.0.0" />

@@ -18,7 +18,7 @@ This plugin depends on cordova-plugin-file. If you want to install this plugin y
 
 The plugin exposes two methods on the window object: 
     
-     DocumentHandler.previewFileFromUrlOrPath(successHandler, failureHandler, url)
+     DocumentHandler.previewFileFromUrlOrPath(successHandler, failureHandler, url, fileName)
 
      DocumentHandler.saveAndPreviewBase64File(successHandler, failureHandler, data, type, path, fileName)
 
@@ -56,7 +56,7 @@ including the corresponding actions such as copy, print, etc.
             console.log('Invalid link');
         }
     },
-    'http://www.polyu.edu.hk/iaee/files/pdf-sample.pdf');
+    'http://www.polyu.edu.hk/iaee/files/pdf-sample.pdf', 'pdf-sample');
     
 
 ## Example 2

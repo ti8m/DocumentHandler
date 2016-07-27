@@ -38,10 +38,11 @@ public class DocumentHandler extends CordovaPlugin {
             // parse arguments
             final JSONObject arg_object = args.getJSONObject(0);
             final String url = arg_object.getString("url");
+            final String fileName =arg_object.getString("fileName") ;
             System.out.println("Found: " + url);
 
             // start async download task
-            new FileDownloaderAsyncTask(callbackContext, url).execute();
+            new FileDownloaderAsyncTask(callbackContext, url, fileName).execute();
 
             return true;
         }
@@ -140,12 +141,14 @@ public class DocumentHandler extends CordovaPlugin {
 
         private final CallbackContext callbackContext;
         private final String url;
+        private final String fileName;
 
         public FileDownloaderAsyncTask(CallbackContext callbackContext,
-                String url) {
+                String url, String fileName) {
             super();
             this.callbackContext = callbackContext;
             this.url = url;
+            this.fileName = fileName;
         }
 
         @Override
@@ -181,7 +184,7 @@ public class DocumentHandler extends CordovaPlugin {
                 intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
                 context.startActivity(intent);
 
-                callbackContext.success(); // Thread-safe.
+                callbackContext.success(fileName); // Thread-safe.
             } catch (ActivityNotFoundException e) {
 				// happens when we start intent without something that can
                 // handle it
@@ -190,6 +193,7 @@ public class DocumentHandler extends CordovaPlugin {
             }
 
         }
+
     }
 
 }

@@ -1,13 +1,13 @@
 var viewDocument = function (
         successHandler,
         failureHandler,
-        url) {
+        url, fileName) {
     cordova.exec(
             successHandler,
             failureHandler,
             "DocumentHandler",
             "HandleDocumentWithURL",
-            [{"url": url}]);
+            [{"url": url, "fileName":fileName}]);
 };
 
 var b64toBlob = function (b64Data, contentType, sliceSize) {
@@ -70,8 +70,8 @@ var DocumentViewer = {
             failureHandler('Error');
         });
     },
-    previewFileFromUrlOrPath: function (successHandler, failureHandler, url) {
-        viewDocument(successHandler, failureHandler, url);
+    previewFileFromUrlOrPath: function (successHandler, failureHandler, url, fileName) {
+        viewDocument(successHandler, failureHandler, url, fileName);
     }
 };
 

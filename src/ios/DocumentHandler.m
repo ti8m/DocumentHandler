@@ -16,6 +16,8 @@ static NSNumber *orientation = nil;
 {
     
     orientation = [NSNumber numberWithInt:[[UIDevice currentDevice] orientation]];
+    NSLog(@"setting orientation to");
+    NSLog(@"%@", orientation);
     
     __weak DocumentHandler* weakSelf = self;
     
@@ -62,7 +64,6 @@ static NSNumber *orientation = nil;
 }
 
 - (void)previewControllerWillDismiss:(QLPreviewController *)controller {
-    
     if (orientation.intValue == 3) {
         orientation = [NSNumber numberWithInt:4];
     } else if (orientation.intValue == 4) {
@@ -75,7 +76,11 @@ static NSNumber *orientation = nil;
         orientation = [NSNumber numberWithInt:3];
     }
     
-    [[UIDevice currentDevice] setValue:orientation forKey:@"orientation"];
+    NSNumber *currentOrientation = [NSNumber numberWithInt:[[UIDevice currentDevice] orientation]];
+    
+    if (currentOrientation.intValue == 1 || currentOrientation.intValue == 2) {
+        [[UIDevice currentDevice] setValue:orientation forKey:@"orientation"];
+    }
 }
 
 - (id <QLPreviewItem>) previewController: (QLPreviewController *) controller previewItemAtIndex: (NSInteger) index

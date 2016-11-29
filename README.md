@@ -44,6 +44,21 @@ There is a special failure condition on Android, if the system doesn't have any 
 The plugin downloads the document and provides a preview of the document using the Quick Look framework,
 including the corresponding actions such as copy, print, etc.
 
+##Important note
+
+If you are using `saveAndPreviewBase64File` for Android OS must be provided public path, because third part application cannot access the file.
+Choose one from the following:
+
+| Device Path                                     | `cordova.file.*`            | `AndroidExtraFileSystems` | r/w? | persistent? | OS clears | private |
+|:------------------------------------------------|:----------------------------|:--------------------------|:----:|:-----------:|:---------:|:-------:|
+| `<sdcard>/`                                     | externalRootDirectory       | sdcard                    | r/w  |     Yes     |     No    |   No    |
+| &nbsp;&nbsp;&nbsp;`Android/data/<app-id>/`      | externalApplicationStorageDirectory | -                 | r/w  |     Yes     |     No    |   No    |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`cache`     | externalCacheDirectry       | cache-external            | r/w  |     Yes     |     No\*\*|   No    |
+| &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;`files`     | externalDataDirectory       | files-external            | r/w  |     Yes     |     No    |   No    |
+
+
+
+
 ## Example 1
 
     DocumentHandler.previewFileFromUrlOrPath(

@@ -65,7 +65,7 @@ var DocumentViewer = {
     saveAndPreviewBase64File: function (successHandler, failureHandler, data, type, path, fileName) {
         writeBase64ToFile(fileName, data, path, type).then(
                 function (response) {
-                    viewDocument(successHandler, failureHandler, path + fileName);
+                    viewDocument(successHandler, failureHandler, path + fileName, fileName);
                 }, function (error) {
             failureHandler('Error');
         });

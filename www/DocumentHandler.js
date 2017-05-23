@@ -71,7 +71,6 @@ var DocumentViewer = {
         });
     },
     previewFileFromUrlOrPath: function (successHandler, failureHandler, url, fileName) {
-		url = encodeURI(url);
         viewDocument(successHandler, failureHandler, url, fileName);
     }
 };

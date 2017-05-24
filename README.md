@@ -71,7 +71,7 @@ Choose one from the following:
             console.log('Invalid link');
         }
     },
-    'http://www.polyu.edu.hk/iaee/files/pdf-sample.pdf', 'pdf-sample');
+    'http://www.axmag.com/download/pdfurl-guide.pdf', 'pdf-sample');
     
 
 ## Example 2

@@ -32,7 +32,22 @@
         <config-file target="AndroidManifest.xml" parent="/*">
             <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
         </config-file>
-
+		
+		<config-file target="AndroidManifest.xml" parent="/manifest/application">
+					 <provider
+              android:name="android.support.v4.content.FileProvider"
+              android:authorities="$PACKAGE_NAME.fileprovider"
+              android:exported="false"
+              android:grantUriPermissions="true">
+              <meta-data
+                  android:name="android.support.FILE_PROVIDER_PATHS"
+                  android:resource="@xml/provider_paths"/>
+			</provider>
+		</config-file>
+		
+		<framework src="com.android.support:support-v4:24.1.1+" />
+		
+		<source-file src="src/android/res/xml/provider_paths.xml" target-dir="res/xml" />
         <source-file src="src/android/DocumentHandler.java" target-dir="src/ch/ti8m/phonegap/plugins" />
 
     </platform>

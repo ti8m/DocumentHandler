@@ -9,11 +9,13 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 
+import org.apache.cordova.BuildConfig;
 import org.apache.cordova.CallbackContext;
 import org.apache.cordova.CordovaPlugin;
 import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
+import android.content.pm.PackageManager;
 
 import android.content.ActivityNotFoundException;
 import android.content.Context;
@@ -23,12 +25,15 @@ import android.os.AsyncTask;
 import android.webkit.CookieManager;
 import android.webkit.MimeTypeMap;
 
+import android.support.v4.content.FileProvider;
+
 public class DocumentHandler extends CordovaPlugin {
 
     public static final String HANDLE_DOCUMENT_ACTION = "HandleDocumentWithURL";
     public static final int ERROR_NO_HANDLER_FOR_DATA_TYPE = 53;
     public static final int ERROR_FILE_NOT_FOUND = 2;
     public static final int ERROR_UNKNOWN_ERROR = 1;
+	private static String FILE_PROVIDER_PACKAGE_ID;
 
     @Override
     public boolean execute(String action, JSONArray args,
@@ -39,6 +44,7 @@ public class DocumentHandler extends CordovaPlugin {
             final JSONObject arg_object = args.getJSONObject(0);
             final String url = arg_object.getString("url");
             final String fileName =arg_object.getString("fileName") ;
+			FILE_PROVIDER_PACKAGE_ID = cordova.getActivity().getPackageName() + ".fileprovider";
             System.out.println("Found: " + url);
 
             // start async download task
@@ -180,8 +186,11 @@ public class DocumentHandler extends CordovaPlugin {
             // start an intent with the file
             try {
                 Intent intent = new Intent(Intent.ACTION_VIEW);
-                intent.setDataAndType(Uri.fromFile(result), mimeType);
-                intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				Uri contentUri = FileProvider.getUriForFile(context, FILE_PROVIDER_PACKAGE_ID, result);
+                intent.setDataAndType(contentUri, mimeType);
+                intent.addFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
+				intent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+				PackageManager pm = context.getPackageManager();
                 context.startActivity(intent);
 
                 callbackContext.success(fileName); // Thread-safe.

@@ -1,0 +1,65 @@
+ {
+  "name": "cordova-plugin-document-handler",
+  "displayName": "Document Handler",
+  "version": "1.0.0",
+  "description": "A phonegap plugin to handle documents (f.e. PDFs) loaded from a URL",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "https://github.com/ti8m",
+  "license": "",
+  "dependencies": {
+    "cordova-android": "^6.2.3",
+    "cordova-plugin-device": "^1.1.6",
+    "cordova-plugin-file-transfer": "^1.6.3",
+    "cordova-plugin-inappbrowser": "^1.7.1",
+    "cordova-plugin-whitelist": "^1.3.2",
+    "phonegap-plugin-push": "git+https://github.com/phonegap/phonegap-plugin-push.git"
+  },
+  "cordova": {
+    "plugins": {
+      "cordova-plugin-whitelist": {},
+      "cordova-plugin-inappbrowser": {},
+      "phonegap-plugin-push": {},
+      "cordova-plugin-device": {},
+      "cordova-plugin-file-transfer": {}
+    },
+    "platforms": [
+      "android",
+      "ios"
+    ]
+  },
+  "devDependencies": {
+    "babel-plugin-add-header-comment": "undefined1.0.3",
+    "cordova-plugin-inappbrowser": "undefined1.7.1",
+    "cordova-android": "undefined6.2.3",
+    "cordova-plugin-file-transfer": "undefined1.6.3",
+    "cordova-plugin-device": "undefined1.1.6",
+    "cordova-plugin-whitelist": "undefined1.3.2",
+    "install": "undefined0.8.9",
+    "phonegap-plugin-push": "undefined2.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ti8mag/DocumentHandler.git"
+  },
+  "keywords": [
+    "cordova",
+    "Documents",
+    "PDF",
+    "ecosystem:cordova",
+    "cordova-android",
+    "cordova-ios"
+  ],
+  "engines": [
+    {
+      "name": "cordova",
+      "version": ">=3.0.0"
+    }
+  ],
+  "bugs": {
+    "url": "https://github.com/ti8mag/DocumentHandler/issues"
+  },
+  "homepage": "https://github.com/ti8mag/DocumentHandler#readme"
+}

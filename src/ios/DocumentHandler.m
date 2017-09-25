@@ -3,8 +3,22 @@
 
 @implementation DocumentHandler
 
+static NSNumber *orientation = nil;
+
++ (NSNumber*) orientation {
+    @synchronized(self) { return orientation; }
+}
++ (void) setOrientation:(NSNumber*)val {
+    @synchronized(self) { orientation = val; }
+}
+
 - (void)HandleDocumentWithURL:(CDVInvokedUrlCommand*)command;
 {
+    
+    orientation = [NSNumber numberWithInt:[[UIDevice currentDevice] orientation]];
+    NSLog(@"setting orientation to");
+    NSLog(@"%@", orientation);
+    
     __weak DocumentHandler* weakSelf = self;
     
     dispatch_queue_t asyncQueue = dispatch_get_global_queue(DISPATCH_QUEUE_PRIORITY_DEFAULT, 0);
@@ -47,6 +61,32 @@
 - (NSInteger) numberOfPreviewItemsInPreviewController: (QLPreviewController *) controller
 {
     return 1;
+}
+
+- (void)previewControllerWillDismiss:(QLPreviewController *)controller {
+    if (orientation.intValue == 3) {
+        orientation = [NSNumber numberWithInt:4];
+    } else if (orientation.intValue == 4) {
+        orientation = [NSNumber numberWithInt:4];
+    } else if (orientation.intValue == 5) {
+        orientation = [NSNumber numberWithInt:4];
+    } else if (orientation.intValue == 6) {
+        orientation = [NSNumber numberWithInt:3];
+    } else {
+        orientation = [NSNumber numberWithInt:3];
+    }
+    
+    NSNumber *currentOrientation = [NSNumber numberWithInt:[[UIDevice currentDevice] orientation]];
+    
+    if (currentOrientation.intValue == 1 || currentOrientation.intValue == 2) {
+        [[UIDevice currentDevice] setValue:orientation forKey:@"orientation"];
+    }
+}
+
+- (void)previewControllerDidDismiss:(QLPreviewController *)controller {
+    NSLog(@"handler dismiss");
+    NSString *pluginReadyJSCallbackCommand = [NSString stringWithFormat:@"cordova.fireDocumentEvent('documentHandlerOnDismiss');"];
+    [self.commandDelegate evalJs:pluginReadyJSCallbackCommand];
 }
 
 - (id <QLPreviewItem>) previewController: (QLPreviewController *) controller previewItemAtIndex: (NSInteger) index

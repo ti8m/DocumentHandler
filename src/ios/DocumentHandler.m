@@ -83,6 +83,12 @@ static NSNumber *orientation = nil;
     }
 }
 
+- (void)previewControllerDidDismiss:(QLPreviewController *)controller {
+    NSLog(@"handler dismiss");
+    NSString *pluginReadyJSCallbackCommand = [NSString stringWithFormat:@"cordova.fireDocumentEvent('documentHandlerOnDismiss');"];
+    [self.commandDelegate evalJs:pluginReadyJSCallbackCommand];
+}
+
 - (id <QLPreviewItem>) previewController: (QLPreviewController *) controller previewItemAtIndex: (NSInteger) index
 {
     return self;

@@ -26,6 +26,10 @@ There is a special failure condition on Android, if the system doesn't have any 
 The plugin downloads the document and provides a preview of the document using the Quick Look framework,
 including the corresponding actions such as copy, print, etc.
 
+## Events (only iOS)
+
+* documentHandlerOnDismiss - it fires after QuickLook window is closed
+
 ## Example usage
 
     handleDocumentWithURL(
@@ -37,4 +41,12 @@ including the corresponding actions such as copy, print, etc.
         }
       }, 
       'http://www.example.com/path/to/document.pdf'
+    );
+
+    document.addEventListener(
+      'documentHandlerOnDismiss',
+      function() {
+          console.log('document handler was closed');
+      },
+      false,
     );
